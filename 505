@@ -1,0 +1,89 @@
+-- 8-BIT ROYAL CROWN - CLIENT VISUAL
+-- Asset ID: 10159600649
+-- Tidak menggunakan GUI
+
+local Players = game:GetService("Players")
+
+local player = Players.LocalPlayer
+local CROWN_ID = "10159600649"
+
+local function debug(msg)
+    print("[8-BIT CROWN] " .. tostring(msg))
+end
+
+local function applyCrown(character)
+    debug("Memulai...")
+
+    local humanoid = character:WaitForChild("Humanoid", 10)
+
+    if not humanoid then
+        warn("[8-BIT CROWN] Humanoid tidak ditemukan.")
+        return
+    end
+
+    debug("Humanoid ditemukan.")
+
+    -- Simpan appearance saat ini
+    local success, description = pcall(function()
+        return humanoid:GetAppliedDescription()
+    end)
+
+    if not success or not description then
+        warn("[8-BIT CROWN] Tidak bisa mendapatkan HumanoidDescription.")
+        warn(description)
+        return
+    end
+
+    debug("HumanoidDescription berhasil didapatkan.")
+
+    -- Tambahkan crown
+    local oldHats = description.HatAccessory
+
+    debug("HatAccessory sebelumnya: " .. tostring(oldHats))
+
+    if oldHats and oldHats ~= "" then
+        description.HatAccessory = oldHats .. "," .. CROWN_ID
+    else
+        description.HatAccessory = CROWN_ID
+    end
+
+    debug("Mencoba memasukkan crown ID: " .. CROWN_ID)
+
+    local applied, err = pcall(function()
+        humanoid:ApplyDescription(description)
+    end)
+
+    if applied then
+        debug("ApplyDescription berhasil.")
+        debug("Crown seharusnya sekarang muncul secara lokal.")
+    else
+        warn("[8-BIT CROWN] ApplyDescription gagal:")
+        warn(err)
+    end
+end
+
+local function setup(character)
+    task.wait(2)
+
+    local success, err = pcall(function()
+        applyCrown(character)
+    end)
+
+    if not success then
+        warn("[8-BIT CROWN] ERROR:")
+        warn(err)
+    end
+end
+
+-- Character sekarang
+if player.Character then
+    task.spawn(function()
+        setup(player.Character)
+    end)
+end
+
+-- Setelah respawn
+player.CharacterAdded:Connect(function(character)
+    debug("Character respawn.")
+    setup(character)
+end)
